@@ -3,7 +3,8 @@ services:
     build: .
     container_name: checkin-board
     restart: unless-stopped
-    env_file: .env
+    # Keep secrets and persistent data outside the release checkout.
+    env_file: ../shared/.env
     ports:
       - "127.0.0.1:4318:4318"
     volumes:
