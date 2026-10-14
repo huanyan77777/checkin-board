@@ -42,7 +42,7 @@ function validName(x) { return typeof x === 'string' && x.trim().length > 0 && x
 function ipHash(req) { return crypto.createHash('sha256').update(String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '')).digest('hex').slice(0,16); }
 function broadcast(event, data) { const p=`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`; for (const c of clients) c.write(p); }
 function csvEscape(x) { const s=String(x ?? ''); return /[",\n]/.test(s) ? `"${s.replaceAll('"','""')}"` : s; }
-function staticFile(res, pathname) { let file = pathname === '/' ? '/join.html' : pathname; if(file==='/screen')file='/screen.html';if(file==='/admin')file='/admin.html';const safe=path.normalize(file).replace(/^([.][.][\\/])+/, '');const target=path.join(publicDir,safe);if(!target.startsWith(publicDir))return false;try{const ext=path.extname(target);const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml'};res.writeHead(200,{'content-type':types[ext]||'application/octet-stream','cache-control':'no-cache'});res.end(fs.readFileSync(target));return true}catch{return false}}
+function staticFile(res, pathname) { let file = pathname === '/' ? '/join.html' : pathname; if(file==='/screen')file='/screen.html';if(file==='/admin')file='/admin.html';const safe=path.normalize(file).replace(/^([.][.][\\/])+/, '');const target=path.join(publicDir,safe);if(!target.startsWith(publicDir))return false;try{const data=fs.readFileSync(target);const ext=path.extname(target);const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml'};res.writeHead(200,{'content-type':types[ext]||'application/octet-stream','cache-control':'no-cache'});res.end(data);return true}catch{return false}}
 async function route(req,res){const u=new URL(req.url,`http://${req.headers.host||'localhost'}`);
   if(req.method==='GET'&&u.pathname==='/health')return json(res,200,{ok:true,service:'checkin-board',database:'sqlite'});
   if(req.method==='GET'&&u.pathname==='/api/config')return json(res,200,snapshot());
@@ -52,4 +52,4 @@ async function route(req,res){const u=new URL(req.url,`http://${req.headers.host
   if(req.method==='GET'&&!staticFile(res,u.pathname))return json(res,404,{error:'not found'});
   if(req.method!=='GET')return json(res,404,{error:'not found'});
 }
-http.createServer((req,res)=>route(req,res).catch(e=>{console.error(e);json(res,500,{error:'server error'})})).listen(port,'127.0.0.1',()=>console.log(`checkin-board listening on 127.0.0.1:${port}`));
+http.createServer((req,res)=>route(req,res).catch(e=>{console.error(e);if(!res.headersSent)json(res,500,{error:'server error'})})).listen(port,'127.0.0.1',()=>console.log(`checkin-board listening on 127.0.0.1:${port}`));
