@@ -12,6 +12,7 @@ const db = new Database(path.join(dataDir, 'checkin.sqlite'));
 const bubbleColors = ['#BBD5FF', '#FFD0C8', '#FFE39A', '#ADE6CF', '#D9C8FA', '#B8E5ED'];
 const columns = db.prepare('PRAGMA table_info(checkins)').all();
 const port = Number(process.env.PORT || 4318);
+const host = process.env.HOST || '127.0.0.1';
 const adminToken = process.env.ADMIN_TOKEN || 'change-this-before-production';
 const eventName = process.env.EVENT_NAME || '北京邮电大学学生会骨干志愿者大会';
 const departments = [
@@ -60,4 +61,4 @@ async function route(req,res){const u=new URL(req.url,`http://${req.headers.host
   if(req.method==='GET'&&!staticFile(res,u.pathname))return json(res,404,{error:'not found'});
   if(req.method!=='GET')return json(res,404,{error:'not found'});
 }
-http.createServer((req,res)=>route(req,res).catch(e=>{console.error(e);if(!res.headersSent)json(res,500,{error:'server error'})})).listen(port,'127.0.0.1',()=>console.log(`checkin-board listening on 127.0.0.1:${port}`));
+http.createServer((req,res)=>route(req,res).catch(e=>{console.error(e);if(!res.headersSent)json(res,500,{error:'server error'})})).listen(port,host,()=>console.log(`checkin-board listening on ${host}:${port}`));

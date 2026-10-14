@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     # Keep secrets and persistent data outside the release checkout.
     env_file: ../shared/.env
+    environment:
+      HOST: 0.0.0.0
     ports:
       - "127.0.0.1:4318:4318"
     volumes:

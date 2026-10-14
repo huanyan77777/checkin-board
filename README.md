@@ -60,7 +60,7 @@ curl http://127.0.0.1:4318/health
 
 Docker 数据保存在命名卷 `checkin_data` 中。升级时执行 `docker compose build --no-cache && docker compose up -d`，回滚时保留上一份镜像标签。
 
-如果使用 `/opt/checkin-board/shared/.env` 保存生产配置（推荐），Docker Compose 会从 `../shared/.env` 读取它；文件中的 `DATA_DIR` 应写为容器路径 `/data`，不要写宿主机路径。只有本地临时运行时才使用项目目录下的 `.env`。
+如果使用 `/opt/checkin-board/shared/.env` 保存生产配置（推荐），Docker Compose 会从 `../shared/.env` 读取它；文件中的 `DATA_DIR` 应写为容器路径 `/data`，不要写宿主机路径。Docker Compose 会将容器内监听地址设置为 `0.0.0.0`，但宿主机端口仍只绑定 `127.0.0.1`。只有本地临时运行时才使用项目目录下的 `.env`。
 
 ## API 摘要
 
