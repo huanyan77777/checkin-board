@@ -1,6 +1,6 @@
 # 六部门互动签到板（第一版）
 
-这是一个不依赖 WordPress 的独立签到应用，适合部署在同一台阿里云 WordPress 服务器上。第一版已经包含 Node.js 后端、SQLite、手机签到、大屏 SSE 实时更新、管理员开关/撤销/导出和 Docker 部署文件。
+这是一个签到应用，
 
 ## 本地运行
 
@@ -16,7 +16,7 @@ node server.js
 
 数据存储使用 SQLite WAL，数据库位于 `DATA_DIR`，不能放在可被 Nginx 直接访问的 `public` 下。
 
-## Alibaba Cloud Linux 3 部署
+## Linux 部署
 
 1. 将本目录打包上传到 `/opt/checkin-board/current`。
 2. 运行 `deploy/install-alinux3.sh` 安装 Node.js、创建 `checkin` 用户和数据目录；或使用 Docker Compose。
