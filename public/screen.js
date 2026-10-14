@@ -7,7 +7,9 @@ let state, seen = null, page = 0, timer, stream;
 const pageSize = 24;
 const completionArtworks = new Map(), completedAt = new Map();
 // Read-only visual preview: never calls a write endpoint or changes attendance.
-const previewDepartment = new URLSearchParams(location.search).get('preview') === 'learning' ? 'learning' : null;
+const animatedDepartments = ['office', 'learning', 'arts', 'sports', 'publicity', 'rights'];
+const requestedPreview = new URLSearchParams(location.search).get('preview');
+const previewDepartment = [...animatedDepartments, 'all'].includes(requestedPreview) ? requestedPreview : null;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 function completionAnimation(department, names) {
   const panel = element('div', 'department-completion');
@@ -42,14 +44,15 @@ function element(tag, cls, text) {
 }
 function render(s, animate = false) {
   state = s; $('total').textContent = s.checkins.length;
-  $('eventState').textContent = previewDepartment ? '学习部动画预览 · 不修改实际签到状态' : (s.open ? '签到进行中' : '签到暂未开放');
+  const previewName = previewDepartment === 'all' ? '六部门' : s.departments.find(d => d.id === previewDepartment)?.name;
+  $('eventState').textContent = previewDepartment ? previewName+'动画预览 · 不修改实际签到状态' : (s.open ? '签到进行中' : '签到暂未开放');
   const fragment = document.createDocumentFragment();
   s.departments.forEach((d, i) => {
     const names = s.checkins.filter(x => x.department === d.id);
     const roster = (s.roster||[]).filter(x => x.department === d.id && x.required);
     const matched = roster.filter(r => names.some(n => n.name === r.name)).length;
     const status=(s.departmentStats||[]).find(x=>x.id===d.id);
-    const complete=d.id===previewDepartment || (status?status.complete:roster.length>0&&matched===roster.length);
+    const complete=previewDepartment==='all' || d.id===previewDepartment || (status?status.complete:roster.length>0&&matched===roster.length);
     const target=status?status.target:(roster.length||null);
     const card = element('section', 'department'+(complete?' complete':''));
     card.dataset.id=d.id;card.style.setProperty('--wash',washes[i]);card.style.setProperty('--accent',accents[i]);
@@ -127,7 +130,7 @@ function connect(){
 }
 async function start(){
   try{
-    await Promise.all(['office', 'learning'].map(async id => {
+    await Promise.all(animatedDepartments.map(async id => {
       if (completionArtworks.has(id)) return;
       try {
         const artwork = await fetch('/animations/'+id+'-complete.svg');

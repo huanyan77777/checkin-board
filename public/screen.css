@@ -39,6 +39,10 @@ h1{font-size:48px;line-height:1.25;margin:0;font-weight:800;letter-spacing:1px;w
 .department.complete{box-shadow:0 5px 0 var(--accent)}
 .department-completion{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#fff6cd 0%,#fffdf7 70%);overflow:hidden}
 .department[data-id="learning"] .department-completion{background:radial-gradient(ellipse at center,#e3edff 0%,#fffdf7 75%)}
+.department[data-id="arts"] .department-completion{background:radial-gradient(ellipse at center,#efe4ff 0%,#fffdf7 75%)}
+.department[data-id="sports"] .department-completion{background:radial-gradient(ellipse at center,#e1f5e8 0%,#fffdf7 75%)}
+.department[data-id="publicity"] .department-completion{background:radial-gradient(ellipse at center,#ffe8de 0%,#fffdf7 75%)}
+.department[data-id="rights"] .department-completion{background:radial-gradient(ellipse at center,#dff4f5 0%,#fffdf7 75%)}
 .department-completion svg{display:block;width:100%;height:100%;min-height:0}
 .animation-finished .dept-header{height:85px}
 .animation-finished .dept-header h3{color:#18785b;display:flex;align-items:center;gap:12px}
