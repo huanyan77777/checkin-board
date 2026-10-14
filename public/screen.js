@@ -30,7 +30,7 @@ function render(s, animate = false) {
     header.append(element('h3','',d.name));
     const icon=element('img','icon');icon.src='/assets/'+d.id+'.png';icon.alt='';header.append(icon);
     const progress=element('div','progress');
-    progress.append(element('strong','',names.length+' 人'),element('small','',target!==null ? '应到 '+target+' 人':'待设置应到人数'));
+    progress.append(element('strong','',names.length+' 人'),element('small','',target!==null ? '应到 '+target+' 人':''));
     header.append(progress);card.append(header);
     // Unknown roster: 24 display cells are placeholders, never an attendance target.
     const slots = Math.max(names.length, target===null?pageSize:target,1);
@@ -49,8 +49,8 @@ function render(s, animate = false) {
     }
     card.append(cells);
     const foot=element('div','card-footer');
-    foot.append(element('span','',complete?(status?.mode==='complete'?'工作人员已标记完成':'签到已完成'):status?.mode==='incomplete'?'工作人员标记：尚未完成':target!==null?'每一次到场，都点亮一格':'暗格为展示占位，不代表应到人数'),
-      element('span','',pages>1?(current+1)+' / '+pages+' 页 · 自动轮播':''));
+    foot.append(element('span','',complete?'签到已完成':''),
+      element('span','',pages>1?(current+1)+' / '+pages:''));
     card.append(foot);fragment.append(card);
   });
   $('grid').replaceChildren(fragment);
