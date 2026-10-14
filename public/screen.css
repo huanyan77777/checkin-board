@@ -1,1 +1,46 @@
-html,body.screen-body{margin:0;width:100%;height:100%;overflow:hidden;background:#fdf8ee}.screen-shell{width:100vw;height:100vh;display:grid;place-items:center;position:relative}.stage{position:relative;width:min(100vw,133.333vh);height:min(75vw,100vh);aspect-ratio:4/3;overflow:hidden;background:#fdf8ee}.board-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.overlay{position:absolute;inset:0}.panel{position:absolute;left:2.3%;width:29.7%;height:29.4%;top:28.3%;padding:8.8% 1.8% 1.7%;overflow:hidden}.panel-office{left:35.3%}.panel-arts{left:66.1%}.panel-sports{top:63.2%}.panel-publicity{left:35.3%;top:63.2%}.panel-rights{left:66.1%;top:63.2%}.names{display:flex;flex-wrap:wrap;align-content:flex-start;gap:clamp(4px,.35vw,10px);height:100%;overflow:hidden}.name{font-size:clamp(15px,1.38vw,34px);line-height:1.35;padding:.12em .48em;color:#17366f;background:#eef3ff;border:1px solid #cddbf8;border-radius:.42em;white-space:nowrap;box-shadow:0 2px 0 #b8c8e5}.placeholder{font-size:clamp(14px,1.1vw,28px);color:#9aa7ba}.count{position:absolute;right:4%;top:10%;font-size:clamp(18px,1.8vw,42px);font-weight:800;color:#17366f}.count small{font-size:.45em;margin-left:.12em;font-weight:600}.screen-controls{position:fixed;z-index:10;right:18px;top:14px;display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:999px;background:#072554cc;color:#fff;font:600 14px system-ui;opacity:.18;transition:opacity .25s}.screen-shell:hover .screen-controls,.screen-controls:focus-within{opacity:1}.screen-controls button{width:auto;margin:0;padding:7px 12px;background:#fff;color:#072554;border-radius:999px;font-size:13px}.arrival .panel{animation:panel-arrival .65s cubic-bezier(.2,.8,.2,1)}@keyframes panel-arrival{0%{transform:scale(.985);filter:saturate(.8)}45%{transform:scale(1.012);filter:saturate(1.2)}100%{transform:scale(1)}}@media(max-aspect-ratio:4/3){.stage{width:100vw;height:75vw}}@media(prefers-reduced-motion:reduce){.arrival .panel{animation:none}}
+*{box-sizing:border-box}
+:root{font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;color:#203971;background:#171d2a}
+body{margin:0;overflow:hidden}
+#screenShell{position:fixed;inset:0;background:#171d2a;overflow:hidden}
+.stage{position:absolute;width:1920px;height:1080px;left:50%;top:50%;transform-origin:center;background:#fff9ef;padding:55px 72px 25px;overflow:hidden;display:flex;flex-direction:column}
+.decoration{position:absolute;pointer-events:none}
+.disc{width:410px;height:410px;border-radius:50%;background:#ffda67;right:-160px;top:-260px}
+.arc{width:400px;height:180px;border-radius:50%;background:#bcaaf1;right:-110px;bottom:-155px}
+.masthead{display:flex;align-items:center;gap:30px;position:relative;min-height:148px}
+.logo{width:124px;height:124px;object-fit:contain;flex:none}
+.eyebrow{margin:0 0 13px;color:#315cf4;font-size:28px;font-weight:700;letter-spacing:1px}
+h1{font-size:48px;line-height:1.25;margin:0;font-weight:800;letter-spacing:1px;white-space:nowrap}
+.title-bars{display:flex;gap:12px;margin-top:18px}.title-bars i{display:block;width:290px;height:7px;background:#ff8173;border-radius:8px}.title-bars i+ i{width:65px;background:#ffd564}
+.total{margin-left:auto;display:flex;align-items:baseline;gap:12px;white-space:nowrap;padding:15px 0 15px 24px}
+.total span{font-size:22px}.total strong{font-size:60px;font-variant-numeric:tabular-nums;color:#315cf4}
+.section-heading{display:flex;align-items:center;gap:25px;margin:28px 0 20px}
+.section-heading h2{font-size:28px;margin:0}.section-heading p{font-size:19px;margin:0;color:#6b7890}
+#eventState{margin-left:auto;font-size:17px;color:#5c6c87}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:22px;flex:1;min-height:0}
+.department{border-radius:24px;background:white;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 5px 0 #e7e2d9;border:1px solid #e8e7e4}
+.dept-header{height:103px;flex:none;display:flex;align-items:center;padding:12px 22px;gap:16px;background:var(--wash)}
+.dept-header:before{content:"";height:35px;width:5px;border-radius:4px;background:var(--accent)}
+.dept-header h3{font-size:30px;margin:0;white-space:nowrap}
+.icon{width:90px;height:80px;object-fit:contain;margin-left:auto}
+.progress{min-width:100px;text-align:right;flex:none}
+.progress strong{font-size:28px;display:block;font-variant-numeric:tabular-nums}
+.progress small{font-size:13px;color:#53657e;display:block;margin-top:4px}
+.bubbles{padding:16px 20px 10px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:8px;flex:1;min-height:0;background:#f4f3f2}
+.cell{border-radius:10px;background:#202735;box-shadow:inset 0 0 10px #ffffff0d;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+.cell.empty:after{content:"";width:4px;height:4px;border-radius:50%;background:#ffffff26}
+.cell.lit{background:var(--bubble);color:#173158;box-shadow:0 2px 0 #17315819}
+.cell span{font-size:20px;font-weight:700;padding:3px 5px;line-height:1.15;text-align:center;overflow-wrap:anywhere}
+.cell.long span{font-size:15px}
+.department[data-id="sports"] .cell.lit,.department[data-id="publicity"] .cell.lit{border-radius:50%}
+.department[data-id="rights"] .cell.lit:before{content:"♥";color:#1731582b;position:absolute;right:5px;top:1px;font-size:18px}
+.department[data-id="arts"] .cell.lit:before{content:"♪";position:absolute;right:3px;top:0;color:#17315840;font-size:18px}
+.cell.arrive{animation:light-in .7s ease both}
+.card-footer{font-size:13px;color:#657394;padding:6px 20px 10px;background:#f4f3f2;display:flex;justify-content:space-between;min-height:30px}
+.department.complete{box-shadow:0 5px 0 var(--accent)}
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:23px;font-size:16px;color:#657394}
+.dots{color:#a28adc;letter-spacing:4px}.controls{position:fixed;right:18px;top:14px;z-index:5;display:flex;align-items:center;gap:10px;padding:9px 12px;background:#172c50ec;color:white;border-radius:12px;font-size:13px;transition:opacity .25s}
+.controls button{border:0;border-radius:7px;padding:8px 12px;background:#fff9ef;color:#203971;cursor:pointer}
+.controls.hidden{opacity:0;pointer-events:none}
+@keyframes light-in{0%{opacity:.2;transform:scale(.65)}65%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.cell.arrive{animation:none}}
+

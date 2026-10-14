@@ -1,1 +1,16 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>活动签到</title><link rel="stylesheet" href="/style.css"></head><body><main><p class="sub">北京邮电大学学生会</p><h1 id="event">活动签到</h1><section class="card"><p>签到后姓名会显示在现场大屏对应部门下方。</p><form id="form"><label>姓名<input id="name" maxlength="30" required autocomplete="name" placeholder="请输入真实姓名"></label><label>部门<select id="department" required><option value="">请选择部门</option></select></label><button id="submit">确认签到</button><p id="msg" role="status"></p></form></section></main><script>const $=id=>document.getElementById(id);let cfg;async function init(){cfg=await fetch('/api/config').then(r=>r.json());$('event').textContent=cfg.eventName;cfg.departments.forEach(d=>{let o=document.createElement('option');o.value=d.id;o.textContent=d.name;$('department').append(o)});if(!cfg.open){$('msg').textContent='签到暂未开放';$('submit').disabled=true}}$('form').onsubmit=async e=>{e.preventDefault();$('submit').disabled=true;$('msg').className='';$('msg').textContent='提交中…';try{let r=await fetch('/api/checkins',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:$('name').value,department:$('department').value})});let d=await r.json();if(!r.ok)throw Error(d.error);$('msg').className='ok';$('msg').textContent=d.duplicate?'你已经签到过了':'签到成功，请看大屏';$('form').reset()}catch(e){$('msg').className='err';$('msg').textContent=e.message||'提交失败，请重试'}finally{$('submit').disabled=false}};init()</script></body></html>
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>点亮你的部门 · 大会签到</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/join.css"><script src="/join.js" defer></script></head>
+<body class="join-page"><main>
+<p class="sub">2026年北京邮电大学学生会</p><h1>点亮你的部门</h1>
+<p class="intro">全体工作人员及骨干志愿者大会</p>
+<section class="card"><p>留下名字，选一个喜欢的颜色。签到成功后，你的文字泡将点亮现场大屏的一小块区域。</p>
+<form id="form">
+<label for="name">姓名</label><input id="name" maxlength="30" required autocomplete="name" placeholder="请输入真实姓名">
+<label for="department">所在部门</label><select id="department" required><option value="">请选择部门</option></select>
+<fieldset><legend>喜欢的文字泡颜色</legend><div id="colors" class="color-options"></div></fieldset>
+<div class="bubble-preview"><span id="preview">你的名字</span></div>
+<p class="privacy">提交即表示知悉：姓名与所选颜色将展示在现场大屏，请勿填写其他隐私信息。</p>
+<button id="submit" disabled>加载签到状态…</button><p id="msg" role="status" aria-live="polite"></p>
+</form></section><p class="sub bottom-note">北京邮电大学学生会 · 欢迎你的到来</p>
+</main></body></html>

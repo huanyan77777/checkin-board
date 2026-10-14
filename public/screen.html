@@ -1,8 +1,30 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>签到大屏</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/screen.css"></head><body class="screen-body"><main class="screen-shell" id="screenShell"><div class="screen-controls"><span id="status">连接中…</span><button id="fullBtn" type="button">全屏播放</button></div><div class="stage" id="stage"><img class="board-art" src="/assets/board-preview.png" alt="漫画平涂版签到板背景"><div id="overlay" class="overlay"></div></div></main><script>
-const $=id=>document.getElementById(id);let lastCount=0;
-function render(s,animate=false){document.title=s.eventName;const by=Object.fromEntries(s.departments.map(d=>[d.id,{...d,n:[]} ]));s.checkins.forEach(x=>by[x.department]?.n.push(x));$('overlay').innerHTML=s.departments.map(d=>{const names=by[d.id].n;return `<section class="panel panel-${d.id}"><div class="count">${names.length}<small>人</small></div><div class="names">${names.map(x=>`<span class="name">${esc(x.name)}</span>`).join('')||'<span class="placeholder">等待签到…</span>'}</div></section>`}).join('');if(animate||s.checkins.length>lastCount){$('stage').classList.remove('arrival');void $('stage').offsetWidth;$('stage').classList.add('arrival');}lastCount=s.checkins.length}
-function esc(x){return String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function enterFullscreen(){const el=$('screenShell');if(!document.fullscreenElement){await el.requestFullscreen?.()}else await document.exitFullscreen?.()}
-function connect(){const es=new EventSource('/api/events');es.onopen=()=>$('status').textContent='实时连接';es.onerror=()=>$('status').textContent='连接恢复中…';for(const type of ['snapshot','checkin','state'])es.addEventListener(type,e=>render(JSON.parse(e.data),type==='checkin'))}
-$('fullBtn').onclick=enterFullscreen;document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='f')enterFullscreen();if(e.key==='Escape'&&document.fullscreenElement)document.exitFullscreen()});document.addEventListener('fullscreenchange',()=>{$('fullBtn').textContent=document.fullscreenElement?'退出全屏':'全屏播放'});fetch('/api/config').then(r=>r.json()).then(s=>{render(s);connect()});
-</script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大会签到 · 实时大屏</title><link rel="stylesheet" href="/screen.css">
+<script src="/screen.js" defer></script>
+</head>
+<body>
+<div id="screenShell">
+  <nav class="controls" aria-label="播放控制">
+    <span id="connection" role="status">正在连接…</span>
+    <button id="fullBtn">全屏播放 · F</button>
+    <button id="hideBtn">隐藏控制栏 · H</button>
+  </nav>
+  <main id="stage" class="stage">
+    <div class="decoration disc"></div><div class="decoration arc"></div>
+    <header class="masthead">
+      <img class="logo" src="/assets/logo.png" alt="北京邮电大学校徽">
+      <div><p class="eyebrow">2026年北京邮电大学学生会</p>
+        <h1>全体工作人员及骨干志愿者大会</h1>
+        <div class="title-bars"><i></i><i></i></div>
+      </div>
+      <div class="total"><span>已签到</span><strong id="total">0</strong><span>人</span></div>
+    </header>
+    <section class="section-heading"><h2>点亮你的部门</h2><p>扫码签到，留下名字，让每一份热爱汇聚于此。</p><span id="eventState">加载中</span></section>
+    <div id="grid" class="grid" aria-label="六部门签到区域"></div>
+    <footer><span>北京邮电大学学生会</span><span id="footerHint">姓名泡按所选颜色点亮 · 未签到区域保持暗色</span><span class="dots">● ● ● ●</span></footer>
+  </main>
+</div>
+</body></html>
