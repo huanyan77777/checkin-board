@@ -5,14 +5,19 @@ const washes = ['#edf2ff','#fff5d9','#f3eeff','#e9f8f0','#fff0e9','#eaf6fa'];
 const accents = ['#5079ef','#ebad32','#a28adc','#39ac89','#f27d6f','#4fadca'];
 let state, seen = null, page = 0, timer, stream;
 const pageSize = 24;
-let officeArtwork = null, officeCompletedAt = null;
+const completionArtworks = new Map(), completedAt = new Map();
+// Read-only visual preview: never calls a write endpoint or changes attendance.
+const previewDepartment = new URLSearchParams(location.search).get('preview') === 'learning' ? 'learning' : null;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-function officeAnimation(names) {
-  const panel = element('div', 'office-completion');
-  const svg = officeArtwork.cloneNode(true);
-  svg.setAttribute('viewBox', '220 130 520 355');
-  svg.querySelector('title').textContent = '办公室签到完成';
-  svg.querySelector('desc').textContent = '办公室签到完成：姓名汇入信封，齿轮旋转，完成徽章亮起。';
+function completionAnimation(department, names) {
+  const panel = element('div', 'department-completion');
+  const svg = completionArtworks.get(department.id).cloneNode(true);
+  svg.dataset.department = department.id;
+  if (department.id === 'office') {
+    svg.setAttribute('viewBox', '220 130 520 355');
+    svg.querySelector('desc').textContent = '办公室签到完成：姓名汇入信封，齿轮旋转，完成徽章亮起。';
+  }
+  svg.querySelector('title').textContent = department.name + '签到完成';
   // Use real attendees, never the standalone sample's placeholder names.
   [...svg.querySelectorAll('text')].slice(0, 6).forEach((label, i) => {
     label.textContent = names[i]?.name || '';
@@ -23,7 +28,7 @@ function officeAnimation(names) {
     }
   });
   // Completion is announced in the department header, not inside the artwork.
-  svg.querySelector('text[x="480"]').parentElement.remove();
+  if (department.id === 'office') svg.querySelector('text[x="480"]').parentElement.remove();
   panel.append(svg);
   return panel;
 }
@@ -37,14 +42,14 @@ function element(tag, cls, text) {
 }
 function render(s, animate = false) {
   state = s; $('total').textContent = s.checkins.length;
-  $('eventState').textContent = s.open ? '签到进行中' : '签到暂未开放';
+  $('eventState').textContent = previewDepartment ? '学习部动画预览 · 不修改实际签到状态' : (s.open ? '签到进行中' : '签到暂未开放');
   const fragment = document.createDocumentFragment();
   s.departments.forEach((d, i) => {
     const names = s.checkins.filter(x => x.department === d.id);
     const roster = (s.roster||[]).filter(x => x.department === d.id && x.required);
     const matched = roster.filter(r => names.some(n => n.name === r.name)).length;
     const status=(s.departmentStats||[]).find(x=>x.id===d.id);
-    const complete=status?status.complete:roster.length>0&&matched===roster.length;
+    const complete=d.id===previewDepartment || (status?status.complete:roster.length>0&&matched===roster.length);
     const target=status?status.target:(roster.length||null);
     const card = element('section', 'department'+(complete?' complete':''));
     card.dataset.id=d.id;card.style.setProperty('--wash',washes[i]);card.style.setProperty('--accent',accents[i]);
@@ -54,13 +59,13 @@ function render(s, animate = false) {
     const progress=element('div','progress');
     progress.append(element('strong','',names.length+' 人'),element('small','',target!==null ? '应到 '+target+' 人':''));
     header.append(progress);card.append(header);
-    if (d.id === 'office') {
-      if (!complete) officeCompletedAt = null;
-      else if (officeArtwork) {
-        if (officeCompletedAt === null) officeCompletedAt = performance.now();
-        card.classList.add('office-finished');
+    if (completionArtworks.has(d.id)) {
+      if (!complete) completedAt.delete(d.id);
+      else {
+        if (!completedAt.has(d.id)) completedAt.set(d.id, performance.now());
+        card.classList.add('animation-finished');
         header.querySelector('h3').append(element('span', 'completion-label', '签到完成'));
-        card.append(officeAnimation(names));
+        card.append(completionAnimation(d, names));
         fragment.append(card);
         return;
       }
@@ -87,13 +92,12 @@ function render(s, animate = false) {
     card.append(foot);fragment.append(card);
   });
   $('grid').replaceChildren(fragment);
-  const officeSvg = document.querySelector('.office-completion svg');
-  if (officeSvg) {
+  document.querySelectorAll('.department-completion svg').forEach(svg => {
     // SSE updates and the 8-second paging timer must not replay completion.
-    const elapsed = reducedMotion.matches ? 6.2 : Math.min(6.2, (performance.now()-officeCompletedAt)/1000);
-    officeSvg.setCurrentTime(elapsed);
-    if (elapsed >= 6.2) officeSvg.pauseAnimations();
-  }
+    const elapsed = reducedMotion.matches ? 6.2 : Math.min(6.2, (performance.now()-completedAt.get(svg.dataset.department))/1000);
+    svg.setCurrentTime(elapsed);
+    if (elapsed >= 6.2) svg.pauseAnimations();
+  });
   // Fit uncommon long names inside their cell; do not silently clip them.
   document.querySelectorAll('.cell.lit').forEach(cell => {
     const label=cell.querySelector('span');
@@ -123,15 +127,16 @@ function connect(){
 }
 async function start(){
   try{
-    if (!officeArtwork) {
+    await Promise.all(['office', 'learning'].map(async id => {
+      if (completionArtworks.has(id)) return;
       try {
-        const artwork = await fetch('/animations/office-complete.svg');
+        const artwork = await fetch('/animations/'+id+'-complete.svg');
         if (!artwork.ok) throw Error('artwork');
         const parsed = new DOMParser().parseFromString(await artwork.text(), 'image/svg+xml');
         if (parsed.querySelector('parsererror') || parsed.documentElement.localName !== 'svg') throw Error('svg');
-        officeArtwork = parsed.documentElement;
+        completionArtworks.set(id, parsed.documentElement);
       } catch { /* Keep attendance visible even if the optional artwork cannot load. */ }
-    }
+    }));
     const r=await fetch('/api/config');if(!r.ok)throw Error('load');render(await r.json());connect();
     timer=setInterval(()=>{page++;if(state)render(state);},8000);
   }catch{$('connection').textContent='服务暂不可用，3秒后重试';setTimeout(start,3000);}
