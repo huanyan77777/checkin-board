@@ -5,6 +5,26 @@ const washes = ['#edf2ff','#fff5d9','#f3eeff','#e9f8f0','#fff0e9','#eaf6fa'];
 const accents = ['#5079ef','#ebad32','#a28adc','#39ac89','#f27d6f','#4fadca'];
 let state, seen = null, page = 0, timer, stream;
 const pageSize = 24;
+let officeArtwork = null, officeCompletedAt = null;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function officeAnimation(names) {
+  const panel = element('div', 'office-completion');
+  const svg = officeArtwork.cloneNode(true);
+  svg.setAttribute('viewBox', '150 65 660 510');
+  svg.querySelector('title').textContent = '办公室签到完成';
+  svg.querySelector('desc').textContent = '办公室签到完成：姓名汇入信封，齿轮旋转，完成徽章亮起。';
+  // Use real attendees, never the standalone sample's placeholder names.
+  [...svg.querySelectorAll('text')].slice(0, 6).forEach((label, i) => {
+    label.textContent = names[i]?.name || '';
+    if (!names[i]) label.parentElement.parentElement.style.display = 'none';
+    else if (names[i].name.length > 3) {
+      label.setAttribute('textLength', '80');
+      label.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+    }
+  });
+  panel.append(svg);
+  return panel;
+}
 function fit() {
   const scale = Math.min(innerWidth/1920, innerHeight/1080);
   $('stage').style.transform = 'translate(-50%, -50%) scale('+scale+')';
@@ -32,6 +52,16 @@ function render(s, animate = false) {
     const progress=element('div','progress');
     progress.append(element('strong','',names.length+' 人'),element('small','',target!==null ? '应到 '+target+' 人':''));
     header.append(progress);card.append(header);
+    if (d.id === 'office') {
+      if (!complete) officeCompletedAt = null;
+      else if (officeArtwork) {
+        if (officeCompletedAt === null) officeCompletedAt = performance.now();
+        card.classList.add('office-finished');
+        card.append(officeAnimation(names));
+        fragment.append(card);
+        return;
+      }
+    }
     // Unknown roster: 24 display cells are placeholders, never an attendance target.
     const slots = Math.max(names.length, target===null?pageSize:target,1);
     const pages = Math.max(1,Math.ceil(slots/pageSize));
@@ -54,6 +84,13 @@ function render(s, animate = false) {
     card.append(foot);fragment.append(card);
   });
   $('grid').replaceChildren(fragment);
+  const officeSvg = document.querySelector('.office-completion svg');
+  if (officeSvg) {
+    // SSE updates and the 8-second paging timer must not replay completion.
+    const elapsed = reducedMotion.matches ? 6.2 : Math.min(6.2, (performance.now()-officeCompletedAt)/1000);
+    officeSvg.setCurrentTime(elapsed);
+    if (elapsed >= 6.2) officeSvg.pauseAnimations();
+  }
   // Fit uncommon long names inside their cell; do not silently clip them.
   document.querySelectorAll('.cell.lit').forEach(cell => {
     const label=cell.querySelector('span');
@@ -83,6 +120,15 @@ function connect(){
 }
 async function start(){
   try{
+    if (!officeArtwork) {
+      try {
+        const artwork = await fetch('/animations/office-complete.svg');
+        if (!artwork.ok) throw Error('artwork');
+        const parsed = new DOMParser().parseFromString(await artwork.text(), 'image/svg+xml');
+        if (parsed.querySelector('parsererror') || parsed.documentElement.localName !== 'svg') throw Error('svg');
+        officeArtwork = parsed.documentElement;
+      } catch { /* Keep attendance visible even if the optional artwork cannot load. */ }
+    }
     const r=await fetch('/api/config');if(!r.ok)throw Error('load');render(await r.json());connect();
     timer=setInterval(()=>{page++;if(state)render(state);},8000);
   }catch{$('connection').textContent='服务暂不可用，3秒后重试';setTimeout(start,3000);}
