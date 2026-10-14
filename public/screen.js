@@ -10,7 +10,7 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 function officeAnimation(names) {
   const panel = element('div', 'office-completion');
   const svg = officeArtwork.cloneNode(true);
-  svg.setAttribute('viewBox', '150 65 660 510');
+  svg.setAttribute('viewBox', '220 130 520 355');
   svg.querySelector('title').textContent = '办公室签到完成';
   svg.querySelector('desc').textContent = '办公室签到完成：姓名汇入信封，齿轮旋转，完成徽章亮起。';
   // Use real attendees, never the standalone sample's placeholder names.
@@ -22,6 +22,8 @@ function officeAnimation(names) {
       label.setAttribute('lengthAdjust', 'spacingAndGlyphs');
     }
   });
+  // Completion is announced in the department header, not inside the artwork.
+  svg.querySelector('text[x="480"]').parentElement.remove();
   panel.append(svg);
   return panel;
 }
@@ -57,6 +59,7 @@ function render(s, animate = false) {
       else if (officeArtwork) {
         if (officeCompletedAt === null) officeCompletedAt = performance.now();
         card.classList.add('office-finished');
+        header.querySelector('h3').append(element('span', 'completion-label', '签到完成'));
         card.append(officeAnimation(names));
         fragment.append(card);
         return;

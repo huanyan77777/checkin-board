@@ -40,6 +40,11 @@ h1{font-size:48px;line-height:1.25;margin:0;font-weight:800;letter-spacing:1px;w
 .office-completion{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#fff6cd 0%,#fffdf7 70%);overflow:hidden}
 .office-completion svg{display:block;width:100%;height:100%;min-height:0}
 .office-finished .dept-header{height:85px}
+.office-finished .dept-header h3{color:#18785b;display:flex;align-items:center;gap:12px}
+.completion-label{font-size:18px;font-weight:700;padding:6px 10px;border-radius:9px;background:#d8f3e5;color:#18785b}
+.office-finished .dept-header{gap:10px;padding-left:18px;padding-right:18px}
+.office-finished .icon{width:58px;height:58px}
+.office-finished .progress{min-width:85px}
 footer{display:flex;justify-content:space-between;align-items:center;margin-top:23px;font-size:16px;color:#657394}
 .dots{color:#a28adc;letter-spacing:4px}.controls{position:fixed;right:18px;top:14px;z-index:5;display:flex;align-items:center;gap:10px;padding:9px 12px;background:#172c50ec;color:white;border-radius:12px;font-size:13px;transition:opacity .25s}
 .controls button{border:0;border-radius:7px;padding:8px 12px;background:#fff9ef;color:#203971;cursor:pointer}
