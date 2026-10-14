@@ -21,17 +21,19 @@ function render(s, animate = false) {
     const names = s.checkins.filter(x => x.department === d.id);
     const roster = (s.roster||[]).filter(x => x.department === d.id && x.required);
     const matched = roster.filter(r => names.some(n => n.name === r.name)).length;
-    const complete = roster.length > 0 && matched === roster.length;
+    const status=(s.departmentStats||[]).find(x=>x.id===d.id);
+    const complete=status?status.complete:roster.length>0&&matched===roster.length;
+    const target=status?status.target:(roster.length||null);
     const card = element('section', 'department'+(complete?' complete':''));
     card.dataset.id=d.id;card.style.setProperty('--wash',washes[i]);card.style.setProperty('--accent',accents[i]);
     const header=element('header','dept-header');
     header.append(element('h3','',d.name));
     const icon=element('img','icon');icon.src='/assets/'+d.id+'.png';icon.alt='';header.append(icon);
     const progress=element('div','progress');
-    progress.append(element('strong','',names.length+' 人'),element('small','',roster.length ? matched+'/'+roster.length+' 位应到人员已签到':'待导入应到名单'));
+    progress.append(element('strong','',names.length+' 人'),element('small','',target!==null ? '应到 '+target+' 人':'待设置应到人数'));
     header.append(progress);card.append(header);
     // Unknown roster: 24 display cells are placeholders, never an attendance target.
-    const slots = Math.max(names.length, roster.length || pageSize);
+    const slots = Math.max(names.length, target===null?pageSize:target,1);
     const pages = Math.max(1,Math.ceil(slots/pageSize));
     const current = page % pages;
     const cells=element('div','bubbles');
@@ -47,7 +49,7 @@ function render(s, animate = false) {
     }
     card.append(cells);
     const foot=element('div','card-footer');
-    foot.append(element('span','',complete?'应到人员已全部签到':roster.length?'每一次到场，都点亮一格':'暗格为展示占位，不代表应到人数'),
+    foot.append(element('span','',complete?(status?.mode==='complete'?'工作人员已标记完成':'签到已完成'):status?.mode==='incomplete'?'工作人员标记：尚未完成':target!==null?'每一次到场，都点亮一格':'暗格为展示占位，不代表应到人数'),
       element('span','',pages>1?(current+1)+' / '+pages+' 页 · 自动轮播':''));
     card.append(foot);fragment.append(card);
   });
