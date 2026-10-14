@@ -1,0 +1,12 @@
+services:
+  checkin:
+    build: .
+    container_name: checkin-board
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - checkin_data:/data
+volumes:
+  checkin_data:

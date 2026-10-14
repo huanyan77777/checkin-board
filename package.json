@@ -1,0 +1,9 @@
+{
+  "name": "student-union-checkin-board",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lightweight check-in board for the student union event",
+  "scripts": {"start": "node server.js", "check": "node --check server.js"},
+  "dependencies": {"better-sqlite3": "^11.10.0"},
+  "engines": {"node": ">=20"}
+}
