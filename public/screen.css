@@ -31,8 +31,6 @@ h1{font-size:48px;line-height:1.25;margin:0;font-weight:800;letter-spacing:1px;w
 .cell.lit{background:var(--bubble);color:#173158;box-shadow:0 2px 0 #17315819}
 .cell span{font-size:20px;font-weight:700;padding:3px 5px;line-height:1.15;text-align:center;overflow-wrap:anywhere}
 .cell.long span{font-size:15px}
-.department[data-id="sports"] .cell.lit,.department[data-id="publicity"] .cell.lit{border-radius:50%}
-.department[data-id="rights"] .cell.lit:before{content:"♥";color:#1731582b;position:absolute;right:5px;top:1px;font-size:18px}
 .department[data-id="arts"] .cell.lit:before{content:"♪";position:absolute;right:3px;top:0;color:#17315840;font-size:18px}
 .cell.arrive{animation:light-in .7s ease both}
 .card-footer{font-size:13px;color:#657394;padding:6px 20px 10px;background:#f4f3f2;display:flex;justify-content:space-between;min-height:30px}
